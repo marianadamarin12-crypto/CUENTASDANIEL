@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estefanía · Dashboard</title>
+<style>
+  :root{
+    --bg:#fdf3f8;
+    --card:#ffffff;
+    --ink:#3b2340;
+    --muted:#9a7c9c;
+    --line:#f3d9ea;
+    --ing:#0e9384;
+    --ing-bg:#e1f7f2;
+    --egr:#e0356b;
+    --egr-bg:#fde6ef;
+    --accent:#c2185b;
+    --accent-bg:#fbe3ef;
+    --warn:#e08a1e;
+    --warn-bg:#fef2df;
+    --grad1:#f857a6;
+    --grad2:#a83279;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 20px 60px;}
+  header{margin-bottom:24px;}
+  header h1{
+    font-size:26px;margin:0 0 4px;font-weight:800;
+    background:linear-gradient(90deg,var(--grad1),var(--grad2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    display:inline-block;
+  }
+  header p{margin:0;color:var(--muted);font-size:14px;}
+  header .upd{margin-top:6px;font-size:12px;color:var(--muted);}
+
+  .tabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{
+    padding:12px 16px;font-size:13px;font-weight:700;color:var(--muted);
+    cursor:pointer;border-bottom:3px solid transparent;user-select:none;white-space:nowrap;flex-shrink:0;
+    border-radius:8px 8px 0 0;position:relative;z-index:5;touch-action:manipulation;min-height:24px;
+  }
+  .tab.active{
+    color:#fff;border-bottom-color:transparent;
+    background:linear-gradient(90deg,var(--grad1),var(--grad2));
+  }
+  .section{display:none;}
+  .section.active{display:block;}
+
+  .pay-card{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px;background:var(--card);
+    flex-wrap:wrap;box-shadow:0 2px 10px rgba(194,24,91,0.05);border-left:4px solid var(--line);
+  }
+  .pay-card.st-ok{border-left-color:var(--ing);}
+  .pay-card.st-late{border-left-color:var(--egr);}
+  .pay-card.st-early{border-left-color:var(--accent);}
+  .pay-card .who{font-weight:800;font-size:15px;color:var(--ink);}
+  .pay-card .meta{font-size:12px;color:var(--muted);margin-top:2px;}
+  .pay-badge{
+    font-size:11px;font-weight:800;padding:6px 14px;border-radius:20px;white-space:nowrap;letter-spacing:.03em;
+    box-shadow:0 1px 4px rgba(0,0,0,0.06);
+  }
+  .pay-badge.ok{background:linear-gradient(90deg,#0e9384,#12b3a0);color:#fff;}
+  .pay-badge.late{background:linear-gradient(90deg,#e0356b,#f0688f);color:#fff;}
+  .pay-badge.early{background:linear-gradient(90deg,var(--grad1),var(--grad2));color:#fff;}
+  .pay-detail{font-size:12.5px;color:var(--egr);font-weight:700;margin-top:5px;}
+
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:0 2px 10px rgba(194,24,91,0.06);border-top:3px solid var(--line);transition:transform .15s;}
+  .kpi .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;font-weight:700;}
+  .kpi .value{font-size:22px;font-weight:800;}
+  .kpi .sub{font-size:12px;color:var(--muted);margin-top:4px;}
+  .kpi.pos{border-top-color:var(--ing);} .kpi.pos .value{color:var(--ing);}
+  .kpi.neg{border-top-color:var(--egr);} .kpi.neg .value{color:var(--egr);}
+  .kpi.accent{border-top-color:var(--accent);} .kpi.accent .value{color:var(--accent);}
+  .kpi.warn{border-top-color:var(--warn);} .kpi.warn .value{color:var(--warn);}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:20px;box-shadow:0 2px 12px rgba(194,24,91,0.05);}
+  .panel-head{
+    padding:14px 18px;border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;
+  }
+  .panel-head h2{font-size:15px;margin:0;font-weight:700;}
+  .panel-head .note{font-size:13px;color:var(--muted);}
+  .panel-head .note b{color:var(--ink);}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{
+    text-align:left;padding:10px 14px;background:#f7f9fb;color:var(--muted);
+    font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.02em;
+    border-bottom:1px solid var(--line);
+  }
+  tbody td{padding:9px 14px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  tbody tr:last-child td{border-bottom:none;}
+  td.desc{white-space:normal;}
+  .tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+  .tag.ing{background:var(--ing-bg);color:var(--ing);}
+  .tag.egr{background:var(--egr-bg);color:var(--egr);}
+  td.val{font-weight:700;text-align:right;}
+  td.val.ing{color:var(--ing);}
+  td.val.egr{color:var(--egr);}
+  td.saldo{text-align:right;color:var(--ink);font-weight:600;}
+
+  tfoot td{padding:12px 14px;font-weight:700;border-top:2px solid var(--line);background:#f7f9fb;}
+  tfoot .tot-ing{color:var(--ing);}
+  tfoot .tot-egr{color:var(--egr);}
+
+  .legend{font-size:11px;color:var(--muted);padding:10px 18px;}
+
+  /* Inversiones */
+  .inv-card{
+    border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px;background:var(--card);
+  }
+  .inv-top{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .inv-top .name{font-size:15px;font-weight:700;}
+  .inv-top .cliente{font-size:12px;color:var(--muted);}
+  .inv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;font-size:12.5px;margin-bottom:10px;}
+  .inv-grid div span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.02em;margin-bottom:2px;}
+  .bar-wrap{background:#eef0f3;border-radius:6px;height:10px;overflow:hidden;margin-bottom:4px;}
+  .bar-fill{height:100%;background:var(--accent);border-radius:6px;}
+  .bar-fill.full{background:var(--ing);}
+  .bar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);}
+
+  @media (max-width:640px){
+    .wrap{padding:16px 12px 40px;}
+    .kpis{grid-template-columns:1fr 1fr;}
+    .inv-grid{grid-template-columns:1fr 1fr;}
+    thead th:nth-child(2), tbody td:nth-child(2){display:none;}
+    .pay-card{flex-direction:column;align-items:flex-start;}
+    .pay-badge{align-self:flex-start;}
+    header h1{font-size:20px;}
+    .tabs{flex-wrap:wrap;overflow-x:visible;gap:6px;}
+    .tab{flex:1 1 auto;text-align:center;font-size:11.5px;padding:9px 6px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Dashboard · Estefanía</h1>
+    <p>Cuenta bancaria e inversiones activas · Jul 2025 – Jul 2026</p>
+    <p class="upd">Última actualización: 08/07/2026</p>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="banco" onclick="switchTab(this)">Cuenta bancaria</div>
+    <div class="tab" data-tab="inv" onclick="switchTab(this)">Inversiones</div>
+    <div class="tab" data-tab="pagos" onclick="switchTab(this)">Estado de pagos</div>
+  </div>
+
+  <!-- ===================== CUENTA BANCARIA ===================== -->
+  <div class="section active" id="banco">
+
+    <div class="kpis">
+      <div class="kpi accent">
+        <div class="label">Saldo en banco</div>
+        <div class="value">$58.261.816</div>
+        <div class="sub">Neto banco + cobros inv. − capital invertido</div>
+      </div>
+      <div class="kpi pos">
+        <div class="label">Ingresos</div>
+        <div class="value">$62.016.119</div>
+        <div class="sub">Total extracto</div>
+      </div>
+      <div class="kpi neg">
+        <div class="label">Egresos</div>
+        <div class="value">$19.754.303</div>
+        <div class="sub">Total extracto</div>
+      </div>
+      <div class="kpi accent">
+        <div class="label">Capital invertido</div>
+        <div class="value">$63.000.000</div>
+        <div class="sub">Enviado a inversiones</div>
+      </div>
+      <div class="kpi pos">
+        <div class="label">Cobros de inversiones</div>
+        <div class="value">$79.000.000</div>
+        <div class="sub">Recibido a la fecha</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Extracto bancario · 34 movimientos</h2>
+
+      </div>
+      <table>
+        <thead>
+          <tr><th>Fecha</th><th>Descripción</th><th>Tipo</th><th style="text-align:right;">Valor</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>20/07/2025</td><td class="desc">Saldo inicial en caja</td><td><span class="tag ing">ING</span></td><td class="val ing">+$16.650.000</td></tr>
+          <tr><td>20/07/2025</td><td class="desc">Egreso, Productos Vibes</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$308.000</td></tr>
+          <tr><td>20/07/2025</td><td class="desc">Egreso, Giro Claudia</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$8.325.000</td></tr>
+          <tr><td>20/07/2025</td><td class="desc">Egreso, Tiquete Mariana</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$1.000.000</td></tr>
+          <tr><td>20/07/2025</td><td class="desc">Egreso, Pago Branding Coffee+57</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$1.950.000</td></tr>
+          <tr><td>21/07/2025</td><td class="desc">Consignación Estefanía EE.UU.</td><td><span class="tag ing">ING</span></td><td class="val ing">+$7.000.050</td></tr>
+          <tr><td>05/08/2025</td><td class="desc">Consignación Estefanía EE.UU.</td><td><span class="tag ing">ING</span></td><td class="val ing">+$7.000.012</td></tr>
+          <tr><td>05/08/2025</td><td class="desc">Consignación Estefanía EE.UU.</td><td><span class="tag ing">ING</span></td><td class="val ing">+$3.997.649</td></tr>
+          <tr><td>22/08/2025</td><td class="desc">Egreso, Pago nómina Mariana</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$600.000</td></tr>
+          <tr><td>08/09/2025</td><td class="desc">Consignación Estefanía EE.UU.</td><td><span class="tag ing">ING</span></td><td class="val ing">+$3.864.994</td></tr>
+          <tr><td>22/09/2025</td><td class="desc">Egreso, Honorarios Mariana</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$600.000</td></tr>
+          <tr><td>22/10/2025</td><td class="desc">Egreso, Nómina Mariana</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$600.000</td></tr>
+          <tr><td>12/11/2025</td><td class="desc">Egreso, Certificado Cámara de Comercio</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$29.000</td></tr>
+          <tr><td>13/11/2025</td><td class="desc">Consignación Estefanía EE.UU.</td><td><span class="tag ing">ING</span></td><td class="val ing">+$10.963.212</td></tr>
+          <tr><td>13/11/2025</td><td class="desc">Consignación Estefanía EE.UU.</td><td><span class="tag ing">ING</span></td><td class="val ing">+$7.250.001</td></tr>
+          <tr><td>14/11/2025</td><td class="desc">Egreso, Certificado Cámara de Comercio</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$29.000</td></tr>
+          <tr><td>18/11/2025</td><td class="desc">Egreso, Comisión retiro cajero</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$2.600</td></tr>
+          <tr><td>22/11/2025</td><td class="desc">Egreso, Nómina Mariana</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$600.000</td></tr>
+          <tr><td>15/12/2025</td><td class="desc">Consignación Estefanía EE.UU.</td><td><span class="tag ing">ING</span></td><td class="val ing">+$4.135.537</td></tr>
+          <tr><td>16/12/2025</td><td class="desc">Egreso, 4x1000</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$39.700</td></tr>
+          <tr><td>22/12/2025</td><td class="desc">Egreso, Nómina Mariana</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$600.000</td></tr>
+          <tr><td>22/01/2026</td><td class="desc">Egreso, Nómina Mariana</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$600.000</td></tr>
+          <tr><td>15/02/2026</td><td class="desc">Consignación Estefanía EE.UU.</td><td><span class="tag ing">ING</span></td><td class="val ing">+$351.831</td></tr>
+          <tr><td>20/02/2026</td><td class="desc">Egreso, Estefanía citas y cumple papá</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$238.200</td></tr>
+          <tr><td>22/02/2026</td><td class="desc">Egreso, Nómina Mariana</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$600.000</td></tr>
+          <tr><td>02/03/2026</td><td class="desc">Ingreso Estefanía EE.UU.</td><td><span class="tag ing">ING</span></td><td class="val ing">+$602.113</td></tr>
+          <tr><td>22/03/2026</td><td class="desc">Egreso, Nómina Mariana</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$600.000</td></tr>
+          <tr><td>13/04/2026</td><td class="desc">Egreso, Estefanía ropa</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$600.000</td></tr>
+          <tr><td>20/04/2026</td><td class="desc">Ingreso Cumple Mauro</td><td><span class="tag ing">ING</span></td><td class="val ing">+$200.720</td></tr>
+          <tr><td>22/04/2026</td><td class="desc">Egreso, Nómina Mariana</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$600.000</td></tr>
+          <tr><td>26/04/2026</td><td class="desc">Egreso, Mauro cumple</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$200.720</td></tr>
+          <tr><td>22/05/2026</td><td class="desc">Egreso, Nómina Mariana</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$600.000</td></tr>
+          <tr><td>22/06/2026</td><td class="desc">Egreso, Nómina Mariana</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$600.000</td></tr>
+          <tr><td>08/07/2026</td><td class="desc">Egreso, Estefanía gastos médicos mamá</td><td><span class="tag egr">EGR</span></td><td class="val egr">-$432.083</td></tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3">TOTAL · 34 movimientos</td>
+            <td class="val"><span class="tot-ing">+$62.016.119</span> <span class="tot-egr">-$19.754.303</span></td>
+          </tr>
+        </tfoot>
+      </table>
+      <div class="legend">El saldo en banco disponible ($58.261.816) suma a este neto los cobros de inversiones y resta el capital enviado a inversiones.</div>
+    </div>
+  </div>
+
+  <!-- ===================== INVERSIONES ===================== -->
+  <div class="section" id="inv">
+
+    <div class="kpis">
+      <div class="kpi accent">
+        <div class="label">Capital invertido</div>
+        <div class="value">$63.000.000</div>
+        <div class="sub">En 5 inversiones activas</div>
+      </div>
+      <div class="kpi pos">
+        <div class="label">Cobrado a la fecha</div>
+        <div class="value">$79.000.000</div>
+        <div class="sub">68.5% de lo esperado a cobrar</div>
+      </div>
+      <div class="kpi warn">
+        <div class="label">Pendiente por cobrar</div>
+        <div class="value">$36.335.945</div>
+        <div class="sub">31.5% restante</div>
+      </div>
+      <div class="kpi pos">
+        <div class="label">Rentabilidad proyectada</div>
+        <div class="value">$52.335.945</div>
+        <div class="sub">Total proyectado − capital</div>
+      </div>
+      <div class="kpi accent">
+        <div class="label">Inversiones</div>
+        <div class="value">5</div>
+      </div>
+    </div>
+
+    <div class="inv-card">
+      <div class="inv-top"><span class="name">Motocarro 1</span><span class="cliente">Cliente: Lanza · desde 21/07/2025</span></div>
+      <div class="inv-grid">
+        <div><span>Monto</span>$10.000.000</div>
+        <div><span>Cuota mensual</span>$1.500.000</div>
+        <div><span>Interés</span>10%</div>
+        <div><span>Total esperado</span>$17.307.858</div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:95.3%;"></div></div>
+      <div class="bar-label"><span>Cobrado: $16.500.000 (11 cuotas)</span><span>95.3% · pendiente $807.858</span></div>
+    </div>
+
+    <div class="inv-card">
+      <div class="inv-top"><span class="name">Motocarro 2</span><span class="cliente">Cliente: Pablo Bolívar · desde 05/08/2025</span></div>
+      <div class="inv-grid">
+        <div><span>Monto</span>$13.000.000</div>
+        <div><span>Cuota mensual</span>$1.500.000</div>
+        <div><span>Interés</span>10%</div>
+        <div><span>Total esperado</span>$31.719.450</div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:52%;"></div></div>
+      <div class="bar-label"><span>Cobrado: $16.500.000 (11 cuotas)</span><span>52% · pendiente $15.219.450</span></div>
+    </div>
+
+    <div class="inv-card">
+      <div class="inv-top"><span class="name">Moto carro compañía</span><span class="cliente">Cliente: Javier · desde 05/09/2025</span></div>
+      <div class="inv-grid">
+        <div><span>Monto</span>$6.500.000</div>
+        <div><span>Cuota mensual</span>$900.000</div>
+        <div><span>Interés</span>10%</div>
+        <div><span>Total esperado</span>$12.106.254</div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:44.6%;"></div></div>
+      <div class="bar-label"><span>Cobrado: $5.400.000 (6 cuotas)</span><span>44.6% · pendiente $6.706.254</span></div>
+    </div>
+
+    <div class="inv-card">
+      <div class="inv-top"><span class="name">Moto carro compañía 2</span><span class="cliente">Cliente: Gonzalo · desde 06/09/2025</span></div>
+      <div class="inv-grid">
+        <div><span>Monto</span>$13.500.000</div>
+        <div><span>Cuota mensual</span>$1.800.000</div>
+        <div><span>Interés</span>10%</div>
+        <div><span>Total esperado</span>$26.202.383</div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:48.1%;"></div></div>
+      <div class="bar-label"><span>Cobrado: $12.600.000 (7 cuotas)</span><span>48.1% · pendiente $13.602.383</span></div>
+    </div>
+
+    <div class="inv-card">
+      <div class="inv-top"><span class="name">Gota</span><span class="cliente">Cliente: Luis Inquinivas · desde 01/03/2026</span></div>
+      <div class="inv-grid">
+        <div><span>Monto</span>$20.000.000</div>
+        <div><span>Cuota mensual</span>$2.000.000</div>
+        <div><span>Interés</span>10%</div>
+        <div><span>Total esperado</span>$28.000.000</div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill full" style="width:100%;"></div></div>
+      <div class="bar-label"><span>Cobrado: $28.000.000 (pagó completo)</span><span>100% · pendiente $0</span></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>Totales · 5 inversiones</h2></div>
+      <table>
+        <tbody>
+          <tr><td>Capital invertido</td><td class="saldo">$63.000.000</td></tr>
+          <tr><td style="padding-left:28px;color:var(--muted);font-size:12px;">↳ Capital propio</td><td class="saldo" style="color:var(--muted);font-size:12px;">$46.532.099</td></tr>
+          <tr><td style="padding-left:28px;color:var(--muted);font-size:12px;">↳ Reinvertido (de cobros ya recibidos)</td><td class="saldo" style="color:var(--muted);font-size:12px;">$16.467.901</td></tr>
+          <tr><td>Cobrado a la fecha</td><td class="val ing">+$79.000.000</td></tr>
+          <tr><td>Pendiente por cobrar</td><td class="val egr">$36.335.945</td></tr>
+          <tr><td>% cobrado global</td><td class="saldo">68.5%</td></tr>
+        </tbody>
+      </table>
+      <div class="legend">Luis Inquinivas (Gota) canceló su inversión un mes antes de lo previsto, por eso su total esperado ($28.000.000) es $2.000.000 menor al proyectado originalmente ($30.000.000): una cuota menos de interés causado.</div>
+    </div>
+  </div>
+
+  <!-- ===================== ESTADO DE PAGOS ===================== -->
+  <div class="section" id="pagos">
+
+    <div class="kpis">
+      <div class="kpi pos">
+        <div class="label">Al día</div>
+        <div class="value">3</div>
+        <div class="sub">Lanza, Pablo Bolívar y Gonzalo</div>
+      </div>
+      <div class="kpi accent">
+        <div class="label">Adelantado</div>
+        <div class="value">1</div>
+        <div class="sub">Luis Inquinivas (Gota)</div>
+      </div>
+      <div class="kpi warn">
+        <div class="label">Atrasados</div>
+        <div class="value">1</div>
+        <div class="sub">Javier</div>
+      </div>
+      <div class="kpi neg">
+        <div class="label">Total atrasado</div>
+        <div class="value">$3.600.000</div>
+        <div class="sub">Javier · 4 cuotas</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>Detalle por cliente</h2></div>
+      <div style="padding:14px 16px;">
+
+        <div class="pay-card st-late">
+          <div>
+            <div class="who">Moto carro compañía · Javier</div>
+            <div class="meta">Cuotas acordadas: 14 · Pagadas: 6</div>
+            <div class="pay-detail">4 cuotas atrasadas · $3.600.000 · desde abril 2026</div>
+          </div>
+          <span class="pay-badge late">ATRASADO</span>
+        </div>
+
+        <div class="pay-card st-ok">
+          <div>
+            <div class="who">Motocarro 1 · Lanza</div>
+            <div class="meta">Cuotas acordadas: 12 · Pagadas: 11 completas</div>
+          </div>
+          <span class="pay-badge ok">AL DÍA</span>
+        </div>
+
+        <div class="pay-card st-ok">
+          <div>
+            <div class="who">Motocarro 2 · Pablo Bolívar</div>
+            <div class="meta">Cuotas acordadas: 22 · Pagadas: 11</div>
+          </div>
+          <span class="pay-badge ok">PUNTUAL</span>
+        </div>
+
+        <div class="pay-card st-ok">
+          <div>
+            <div class="who">Moto carro compañía 2 · Gonzalo</div>
+            <div class="meta">Cuotas acordadas: 15 · Pagadas: 7</div>
+          </div>
+          <span class="pay-badge ok">PUNTUAL</span>
+        </div>
+
+        <div class="pay-card st-early">
+          <div>
+            <div class="who">Gota · Luis Inquinivas</div>
+            <div class="meta">Cuotas acordadas: N/A · Pagadas: 100% (pagó anticipado)</div>
+          </div>
+          <span class="pay-badge early">ADELANTADO</span>
+        </div>
+
+      </div>
+      <div class="legend">Javier es el único atrasado, con 4 cuotas ($3.600.000) desde abril de 2026. El resto de clientes está al día o adelantado.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function switchTab(tabEl){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  tabEl.classList.add('active');
+  document.getElementById(tabEl.dataset.tab).classList.add('active');
+}
+</script>
+
+</body>
+</html>
